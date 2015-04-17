@@ -1,5 +1,6 @@
 package com.hack.accident.hackclient;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -7,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -22,11 +24,20 @@ import java.net.URL;
 public class MainActivity extends ActionBarActivity {
 
     public final static String apiURL = "http://ws.strikeiron.com/StrikeIron/EMV6Hygiene/VerifyEmail?";
+    public final static String EXTRA_MESSAGE = "com.example.webapitutorial.MESSAGE";
+
+    private Accident accident = new Accident();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
+
+        accident.setLatitude("123");
+        accident.setLongitude("456");
+
     }
 
 
@@ -54,16 +65,11 @@ public class MainActivity extends ActionBarActivity {
 
     // This is the method that is called when the submit button is clicked
 
-    public void verifyEmail(View view) {
+    public void submitMetadata(View view) {
 
-        EditText emailEditText = (EditText) findViewById(R.id.email_address);
-        String email = emailEditText.getText().toString();
-
-        if( email != null && !email.isEmpty()) {
-            String urlParams = "&VerifyEmail.Email=%s&VerifyEmail.Timeout=30".format(email);
+            String urlParams = "&latitude=%s&longitude=%s".format(accident.getLatitude(), accident.getLongitude());
             String urlString = apiURL + urlParams;
             new CallAPI().execute(urlString);
-        }
     }
 
     private class CallAPI extends AsyncTask<String, String, String> {
@@ -122,6 +128,11 @@ public class MainActivity extends ActionBarActivity {
 
         protected void onPostExecute(String result) {
 
+            Intent intent = new Intent(getApplicationContext(), ResultActivity.class);
+
+            intent.putExtra(EXTRA_MESSAGE, result);
+
+            startActivity(intent);
         }
 
     } // end CallAPI
