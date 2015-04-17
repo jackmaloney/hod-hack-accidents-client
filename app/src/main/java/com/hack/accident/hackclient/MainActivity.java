@@ -47,7 +47,8 @@ import java.nio.charset.StandardCharsets;
 
 public class MainActivity extends ActionBarActivity {
 
-    public final static String apiURL = "http://ws.strikeiron.com/StrikeIron/EMV6Hygiene/VerifyEmail?";
+    public final static String apiURL = "192.168.59.103:32769";
+
     public final static String EXTRA_MESSAGE = "com.example.webapitutorial.MESSAGE";
     private final static int TAKE_PHOTO_CODE = 0;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -139,7 +140,7 @@ public class MainActivity extends ActionBarActivity {
 
     // This is the method that is called when the submit button is clicked
     public void submitMetadata(View view) {
-            String urlParams = "&latitude=%s&longitude=%s".format(accident.getLatitude(), accident.getLongitude());
+            String urlParams = "?latitude=%s&longitude=%s".format(accident.getLatitude(), accident.getLongitude());
             String urlString = apiURL + urlParams;
             new CallAPI().execute(urlString);
     }
