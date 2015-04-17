@@ -55,6 +55,8 @@ public class MainActivity extends ActionBarActivity {
     public final static String DEBUG_TAG = "MakePhotoActivity";
 
     private String imageFile = null;
+    private Double longitude = null;
+    private Double latitude = null;
     private Accident accident = new Accident();
 
     @Override
@@ -90,10 +92,19 @@ public class MainActivity extends ActionBarActivity {
             String locationProvider = LocationManager.GPS_PROVIDER;
             LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
             Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
-            Log.i("CameraDemo", "Last known location: lat %s, long %s".format(
-                    lastKnownLocation.getLatitude() + "", lastKnownLocation.getLongitude() + ""));
-
-
+            if (lastKnownLocation != null) {
+                longitude = lastKnownLocation.getLongitude();
+                latitude = lastKnownLocation.getLatitude();
+                if (longitude != null && latitude != null) {
+                    accident.setLongitude(longitude + "");
+                    accident.setLatitude(latitude + "");
+                    Log.i("CameraDemo", "Last known location: lat %s, long %s".format(latitude + "", longitude + ""));
+                } else {
+                    Log.i("CameraDemo", "No latitude and longitude");
+                }
+            } else {
+                Log.i("CameraDemo", "No location");
+            }
         }
     }
 
@@ -137,7 +148,7 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         protected String doInBackground(String... params) {
-            String urlString=params[0];
+            String urlString = params[0];
             String result = null;
             InputStream in = null;
 

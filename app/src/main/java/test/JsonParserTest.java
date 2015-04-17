@@ -20,12 +20,12 @@ public class JsonParserTest {
 //        assertEquals(message, "Robert");
 //    }
 
-    public static void main(String[] args) {
-        MainActivity main = new MainActivity();
-        InputStream stream = new ByteArrayInputStream("{\"status\":\"OK\",\"timestamp\":\"2015-04-17 11:44:16 +0100\",\"latitude\":\"51.494883\",\"longitude\":\"-0.129057\",\"address_data\":{\"number\":\"78-96\",\"street\":\"Marsham Street\",\"post_code\":\"SW1P 4LY\"}}".getBytes(StandardCharsets.UTF_8));
-
-        String testing = main.parseJson(stream);
-
-        System.out.print(testing);
-    }
+//    public static void main(String[] args) {
+//        MainActivity main = new MainActivity();
+//        InputStream stream = new ByteArrayInputStream("{\"status\":\"OK\",\"timestamp\":\"2015-04-17 11:44:16 +0100\",\"latitude\":\"51.494883\",\"longitude\":\"-0.129057\",\"address_data\":{\"number\":\"78-96\",\"street\":\"Marsham Street\",\"post_code\":\"SW1P 4LY\"}}".getBytes(StandardCharsets.UTF_8));
+//
+//        String testing = main.parseJson(stream);
+//
+//        System.out.print(testing);
+//    }
 }
