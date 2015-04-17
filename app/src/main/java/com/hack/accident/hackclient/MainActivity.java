@@ -77,6 +77,8 @@ public class MainActivity extends ActionBarActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == TAKE_PHOTO_CODE && resultCode == RESULT_OK) {
             Log.d("CameraDemo", "Pic saved in " + imageFile);
+            ExifClient exifClient = new ExifClient(imageFile);
+            exifClient.loadExifData();
         }
     }
 
