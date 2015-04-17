@@ -1,10 +1,13 @@
 package com.hack.accident.hackclient;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -76,9 +79,17 @@ public class MainActivity extends ActionBarActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == TAKE_PHOTO_CODE && resultCode == RESULT_OK) {
-            Log.d("CameraDemo", "Pic saved in " + imageFile);
+            Log.i("CameraDemo", "Pic saved in " + imageFile);
             ExifClient exifClient = new ExifClient(imageFile);
             exifClient.loadExifData();
+
+            String locationProvider = LocationManager.GPS_PROVIDER;
+            LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+            Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
+            Log.i("CameraDemo", "Last known location: lat %s, long %s".format(
+                    lastKnownLocation.getLatitude() + "", lastKnownLocation.getLongitude() + ""));
+
+
         }
     }
 
