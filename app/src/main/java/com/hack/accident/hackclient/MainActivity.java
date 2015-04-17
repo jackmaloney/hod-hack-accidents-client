@@ -43,6 +43,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -71,7 +73,6 @@ public class MainActivity extends ActionBarActivity {
         Button capture = (Button) findViewById(R.id.btnCamera);
         capture.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                String directory = getDirectory();
                 Uri outputFileUri = getOutputFileUri();
                 Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
@@ -154,20 +155,8 @@ public class MainActivity extends ActionBarActivity {
 
             // HTTP Get
             try {
-                URL url = new URL(urlString);
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                in = new BufferedInputStream(urlConnection.getInputStream());
-
-                byte[] contents = new byte[1024];
-
-                int bytesRead=0;
-                String strFileContents = null;
-                while( (bytesRead = in.read(contents)) != -1){
-                    strFileContents = new String(contents, 0, bytesRead);
-                }
-                result = parseJson(strFileContents);
-
-
+                String fileContents = getFileContents();
+                result = parseJson(fileContents);
             } catch (Exception e ) {
                 System.out.println(e.getMessage());
                 return e.getMessage();
@@ -187,6 +176,18 @@ public class MainActivity extends ActionBarActivity {
 
     } // end CallAPI
 
+    private String getFileContents() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String date = dateFormat.format(new Date());
+         return "{\"status\":\"OK\"," +
+            "\"timestamp\":\"" + date + "\"," +
+            "\"latitude\":\"51.494883\"," +
+            "\"longitude\":\"-0.129057\"," +
+            "\"address_data\":{\"number\":\"78-96\"," +
+            "\"street\":\"Marsham Street\"," +
+            "\"post_code\":\"SW1P 4LY\"}" +
+            "}";
+    }
 
 
     public String parseJson(String jsonString) {
@@ -225,7 +226,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private Uri getOutputFileUri() {
-        Long tsLong = System.currentTimeMillis()/1000;Log.d("CameraDemo", "Pic saved");
+        Long tsLong = System.currentTimeMillis()/1000;
         String timestamp = tsLong.toString();
         String file = getDirectory() + timestamp + ".jpg";
         File newFile = new File(file);
