@@ -10,13 +10,18 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -77,8 +82,7 @@ public class MainActivity extends ActionBarActivity {
         @Override
         protected String doInBackground(String... params) {
             String urlString=params[0];
-            String resultToDisplay;
-            EmailVerificationResult result = null;
+            String result = null;
             InputStream in = null;
 
             // HTTP Get
@@ -91,39 +95,9 @@ public class MainActivity extends ActionBarActivity {
                 return e.getMessage();
             }
 
-            // Parse XML
-            XmlPullParserFactory pullParserFactory;
+            result = parseJson(in);
 
-            try {
-                pullParserFactory = XmlPullParserFactory.newInstance();
-                XmlPullParser parser = pullParserFactory.newPullParser();
-
-                parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
-                parser.setInput(in, null);
-                result = parseXML(parser);
-            } catch (XmlPullParserException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            // Simple logic to determine if the email is dangerous, invalid, or valid
-            if (result != null ) {
-                if( result.hygieneResult.equals("Spam Trap")) {
-                    resultToDisplay = "Dangerous email, please correct";
-                }
-                else if( Integer.parseInt(result.statusNbr) >= 300) {
-                    resultToDisplay = "Invalid email, please re-enter";
-                }
-                else {
-                    resultToDisplay = "Thank you for your submission";
-                }
-            }
-            else {
-                resultToDisplay = "Exception Occured";
-            }
-
-            return resultToDisplay;
+            return result;
         }
 
         protected void onPostExecute(String result) {
@@ -137,43 +111,29 @@ public class MainActivity extends ActionBarActivity {
 
     } // end CallAPI
 
-    private EmailVerificationResult parseXML(XmlPullParser parser) throws XmlPullParserException, IOException {
+//    {"status":"OK","timestamp":"2015-04-17 11:44:16 +0100","latitude":"51.494883","longitude":"-0.129057","address_data":{"number":"78-96","street":"Marsham Street","post_code":"SW1P 4LY"}}
 
-        int eventType = parser.getEventType();
-        EmailVerificationResult result = new EmailVerificationResult();
 
-        while( eventType!= XmlPullParser.END_DOCUMENT) {
-            String name = null;
+    private String parseJson(InputStream inputStream) {
+        String result = null;
 
-            switch(eventType)
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"), 8);
+            StringBuilder sb = new StringBuilder();
+
+            String line = null;
+            while ((line = reader.readLine()) != null)
             {
-                case XmlPullParser.START_TAG:
-                    name = parser.getName();
-
-                    if( name.equals("Error")) {
-                        System.out.println("Web API Error!");
-                    }
-                    else if ( name.equals("StatusNbr")) {
-                        result.statusNbr = parser.nextText();
-                    }
-                    else if (name.equals("HygieneResult")) {
-                        result.hygieneResult = parser.nextText();
-                    }
-
-                    break;
-
-                case XmlPullParser.END_TAG:
-                    break;
-            } // end switch
-
-            eventType = parser.next();
-        } // end while
+                sb.append(line + "\n");
+            }
+            result = sb.toString();
+        } catch (Exception e) {
+            // Oops
+        }
+        finally {
+            try{if(inputStream != null)inputStream.close();}catch(Exception squish){}
+        }
 
         return result;
-    }
-
-    private class EmailVerificationResult {
-        public String statusNbr;
-        public String hygieneResult;
     }
 }
