@@ -1,13 +1,23 @@
 package com.hack.accident.hackclient;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.hardware.Camera;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -15,6 +25,8 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -25,21 +37,43 @@ public class MainActivity extends ActionBarActivity {
 
     public final static String apiURL = "http://ws.strikeiron.com/StrikeIron/EMV6Hygiene/VerifyEmail?";
     public final static String EXTRA_MESSAGE = "com.example.webapitutorial.MESSAGE";
+    private final static int TAKE_PHOTO_CODE = 0;
+    private static final int REQUEST_IMAGE_CAPTURE = 1;
 
+    public final static String DEBUG_TAG = "MakePhotoActivity";
+
+    private String imageFile = null;
     private Accident accident = new Accident();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
 
         accident.setLatitude("123");
         accident.setLongitude("456");
 
+        Button capture = (Button) findViewById(R.id.btnCamera);
+        capture.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                String directory = getDirectory();
+                Uri outputFileUri = getOutputFileUri();
+                Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
+                imageFile = outputFileUri.toString();
+                startActivityForResult(cameraIntent, TAKE_PHOTO_CODE);
+            }
+        });
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == TAKE_PHOTO_CODE && resultCode == RESULT_OK) {
+            Log.d("CameraDemo", "Pic saved in " + imageFile);
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -63,10 +97,15 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        }
+    }
+
     // This is the method that is called when the submit button is clicked
-
     public void submitMetadata(View view) {
-
             String urlParams = "&latitude=%s&longitude=%s".format(accident.getLatitude(), accident.getLongitude());
             String urlString = apiURL + urlParams;
             new CallAPI().execute(urlString);
@@ -170,6 +209,43 @@ public class MainActivity extends ActionBarActivity {
         } // end while
 
         return result;
+    }
+
+    private String getDirectory() {
+        final String dir = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES) + "/picFolder/";
+        File newDirectory = new File(dir);
+        newDirectory.mkdirs();
+        return dir;
+    }
+
+    private Uri getOutputFileUri() {
+        Long tsLong = System.currentTimeMillis()/1000;Log.d("CameraDemo", "Pic saved");
+        String timestamp = tsLong.toString();
+        String file = getDirectory() + timestamp + ".jpg";
+        File newFile = new File(file);
+        try {
+            newFile.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Uri.fromFile(newFile);
+    }
+
+    private int findFrontFacingCamera() {
+        int cameraId = -1;
+        // Search for the front facing camera
+        int numberOfCameras = Camera.getNumberOfCameras();
+        for (int i = 0; i < numberOfCameras; i++) {
+            Camera.CameraInfo info = new Camera.CameraInfo();
+            Camera.getCameraInfo(i, info);
+            if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                Log.d(DEBUG_TAG, "Camera found");
+                cameraId = i;
+                break;
+            }
+        }
+        return cameraId;
     }
 
     private class EmailVerificationResult {
