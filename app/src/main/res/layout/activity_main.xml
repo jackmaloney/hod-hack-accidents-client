@@ -24,13 +24,15 @@
         <!--/>-->
 
     <Button
-
         android:layout_width="wrap_content"
-
         android:layout_height="wrap_content"
-
         android:onClick="submitMetadata"
-
         android:text="@string/button_submit" />
+
+    <Button
+        android:id="@+id/btnCamera"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_camera" />
 
 </LinearLayout>
