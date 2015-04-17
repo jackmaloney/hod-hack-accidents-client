@@ -30,7 +30,6 @@
         android:layout_width="350dp"
         android:layout_height="100dp"
         android:text="@string/button_camera"
-
         />
 
     <Button
@@ -38,5 +37,10 @@
         android:layout_height="100dp"
         android:onClick="submitMetadata"
         android:text="@string/button_submit" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView" />
 
 </LinearLayout>
