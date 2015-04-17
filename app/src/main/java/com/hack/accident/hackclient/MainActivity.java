@@ -26,6 +26,8 @@ import android.widget.TextView;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -34,11 +36,13 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -59,8 +63,8 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        accident.setLatitude("123");
-        accident.setLongitude("456");
+        accident.setLatitude("51.494883");
+        accident.setLongitude("-0.129057");
 
         Button capture = (Button) findViewById(R.id.btnCamera);
         capture.setOnClickListener(new View.OnClickListener() {
@@ -142,12 +146,21 @@ public class MainActivity extends ActionBarActivity {
                 URL url = new URL(urlString);
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                 in = new BufferedInputStream(urlConnection.getInputStream());
+
+                byte[] contents = new byte[1024];
+
+                int bytesRead=0;
+                String strFileContents = null;
+                while( (bytesRead = in.read(contents)) != -1){
+                    strFileContents = new String(contents, 0, bytesRead);
+                }
+                result = parseJson(strFileContents);
+
+
             } catch (Exception e ) {
                 System.out.println(e.getMessage());
                 return e.getMessage();
             }
-
-            result = parseJson(in);
 
             return result;
         }
@@ -163,27 +176,30 @@ public class MainActivity extends ActionBarActivity {
 
     } // end CallAPI
 
-//    {"status":"OK","timestamp":"2015-04-17 11:44:16 +0100","latitude":"51.494883","longitude":"-0.129057","address_data":{"number":"78-96","street":"Marsham Street","post_code":"SW1P 4LY"}}
 
 
-    private String parseJson(InputStream inputStream) {
+    public String parseJson(String jsonString) {
         String result = null;
 
         try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"), 8);
             StringBuilder sb = new StringBuilder();
 
-            String line = null;
-            while ((line = reader.readLine()) != null)
-            {
-                sb.append(line + "\n");
+            JSONObject root = new JSONObject(jsonString);
+
+            if (root.getString("status").equals("OK")){
+                sb.append("Your incident taken at " + root.getString("timestamp") + " has been succesfully recorded. \n");
+
+                JSONObject addressData = root.getJSONObject("address_data");
+
+                sb.append("The address is:  " + addressData.getString("number") + ", "
+                        + addressData.getString("street") + ", "
+                        + addressData.getString("post_code"));
+                result = sb.toString();
+            } else {
+                result = "Your submission was unsuccessful";
             }
-            result = sb.toString();
         } catch (Exception e) {
-            // Oops
-        }
-        finally {
-            try{if(inputStream != null)inputStream.close();}catch(Exception squish){}
+            System.out.print("There was an error with your submission");
         }
 
         return result;
