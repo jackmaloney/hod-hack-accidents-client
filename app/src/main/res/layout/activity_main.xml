@@ -8,7 +8,7 @@
 
     android:layout_height="match_parent"
 
-    android:orientation="horizontal" >
+    android:orientation="vertical" >
 
 
     <!--<EditText android:id="@+id/email_address"-->
@@ -23,16 +23,20 @@
 
         <!--/>-->
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="submitMetadata"
-        android:text="@string/button_submit" />
+
 
     <Button
         android:id="@+id/btnCamera"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/button_camera" />
+        android:layout_width="350dp"
+        android:layout_height="100dp"
+        android:text="@string/button_camera"
+
+        />
+
+    <Button
+        android:layout_width="350dp"
+        android:layout_height="100dp"
+        android:onClick="submitMetadata"
+        android:text="@string/button_submit" />
 
 </LinearLayout>
