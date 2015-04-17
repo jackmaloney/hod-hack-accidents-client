@@ -70,6 +70,9 @@ public class MainActivity extends ActionBarActivity {
         accident.setLatitude("51.494883");
         accident.setLongitude("-0.129057");
 
+        ImageView myImage = (ImageView) findViewById(R.id.imageView);
+        myImage.setImageBitmap(null);
+
         Button capture = (Button) findViewById(R.id.btnCamera);
         capture.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -80,6 +83,21 @@ public class MainActivity extends ActionBarActivity {
                 startActivityForResult(cameraIntent, TAKE_PHOTO_CODE);
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (imageFile != null) {
+            File file = new File(imageFile.substring("file:///".length()));
+            Log.i("ON CREATE", "Opening file " + file);
+
+            if (file.exists()) {
+                Bitmap myBitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+                ImageView myImage = (ImageView) findViewById(R.id.imageView);
+                myImage.setImageBitmap(myBitmap);
+            }
+        }
     }
 
     @Override
@@ -111,7 +129,6 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
